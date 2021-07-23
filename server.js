@@ -18,18 +18,25 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use('/api', router);
 
-let url, displayName;
+let url, displayName, inceptionName;
 if(process.env.API_VERSION == "old"){
     displayName = "displayName";
+    inceptionName = "updated";
     url = "https://api.yearn.tools/vaults/all";
 }
 if(process.env.API_VERSION == "new"){
     displayName = "display_name";
-    url = "https://api.yearn.finance/v1/chains/1/vaults/all"
+    inceptionName = "inception";
+    url = "https://api.yearn.finance/v1/chains/1/vaults/all";
 }
 console.log(displayName)
 app.get('/search', function(req, res) {
-    vaultName = req.query.vaultName;
+    vaultName = req.query.vaultName.toLowerCase();
+    let old = false;
+    if(vaultName.includes("-old")){
+        old = true;
+        vaultName = vaultName.split("-")[0];
+    }
     inception = 0;
     axios.get(url)
     .then(response => {
@@ -49,7 +56,7 @@ app.get('/search', function(req, res) {
                         console.log(response.data[i][displayName]);
                         console.log(response.data[i].name);
                         hit.address = response.data[i].address;
-                        hit.inception = response.data[i].inception;
+                        hit.inception = response.data[i][inceptionName];
                         hits.push(hit);
                         found = true;
                     }
@@ -61,22 +68,32 @@ app.get('/search', function(req, res) {
                         console.log(response.data[i][displayName]);
                         console.log(response.data[i].name);
                         hit.address = response.data[i].address;
-                        hit.inception = response.data[i].inception;
+                        hit.inception = response.data[i][inceptionName];
                         hits.push(hit);
                     }
                 }
             }            
         }
         for(let i = 0;i<hits.length;i++){
-            if(inception < hits[i].inception){
-                address = hits[i].address;
+            if(old){
+                if(inception > hits[i].inception){
+                    address = hits[i].address;
+                }
+            }
+            else{
+                if(inception < hits[i].inception){
+                    address = hits[i].address;
+                }
             }
         }
         console.log("CANONICAL",address)
-        redirectUrl = 'https://yearn.watch/vault/'+address;
-        console.log(redirectUrl)
-        res.redirect('https://yearn.watch/vault/'+address);
-        //
+        if(address=="0" || address==0){
+            redirectUrl = 'https://yearn.watch';
+        }
+        else{
+            redirectUrl = 'https://yearn.watch/vault/'+address;
+        }
+        res.redirect(redirectUrl);
     })
     .catch(error => {
         // handle error
