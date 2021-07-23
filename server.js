@@ -18,10 +18,20 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use('/api', router);
 
+let url, displayName;
+if(process.env.API_VERSION == "old"){
+    displayName = "displayName";
+    url = "https://api.yearn.tools/vaults/all";
+}
+if(process.env.API_VERSION == "new"){
+    displayName = "display_name";
+    url = "https://api.yearn.finance/v1/chains/1/vaults/all"
+}
+console.log(displayName)
 app.get('/search', function(req, res) {
     vaultName = req.query.vaultName;
     inception = 0;
-    axios.get('https://api.yearn.finance/v1/chains/1/vaults/all')
+    axios.get(url)
     .then(response => {
         // handle success
         let address = 0;
@@ -30,13 +40,13 @@ app.get('/search', function(req, res) {
         found = false;
         for(let i = 0; i<response.data.length;i++){
             hit = {};
-            let name = (response.data[i].display_name).toLowerCase();
+            let name = (response.data[i][displayName]).toLowerCase();
             if(response.data[i].endorsed){
                 if(name == vaultName.toLowerCase()){
                     if(response.data[i].type == "v2"){
                         address = response.data[i].address;
                         console.log(response.data[i].address);
-                        console.log(response.data[i].display_name);
+                        console.log(response.data[i][displayName]);
                         console.log(response.data[i].name);
                         hit.address = response.data[i].address;
                         hit.inception = response.data[i].inception;
@@ -48,7 +58,7 @@ app.get('/search', function(req, res) {
                     if(response.data[i].type == "v2"){
                         address = response.data[i].address
                         console.log(response.data[i].address);
-                        console.log(response.data[i].display_name);
+                        console.log(response.data[i][displayName]);
                         console.log(response.data[i].name);
                         hit.address = response.data[i].address;
                         hit.inception = response.data[i].inception;
