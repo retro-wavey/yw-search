@@ -74,6 +74,7 @@ app.get('/search', function(req, res) {
                 }
             }            
         }
+        console.log(hits)
         for(let i = 0;i<hits.length;i++){
             if(old){
                 if(inception > hits[i].inception){
