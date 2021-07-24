@@ -78,12 +78,15 @@ app.get('/search', function(req, res) {
         console.log("old",old)
         for(let i = 0;i<hits.length;i++){
             if(old){
-                if(inception > hits[i].inception){
+                if(inception == 0){
+                    address = hits[i].address;
+                }
+                else if (hits[i].inception < inception){
                     address = hits[i].address;
                 }
             }
             else{
-                if(inception < hits[i].inception){
+                if(hits[i].inception > inception){
                     address = hits[i].address;
                 }
             }
