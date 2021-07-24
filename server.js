@@ -74,19 +74,20 @@ app.get('/search', function(req, res) {
                 }
             }            
         }
-        console.log(hits)
-        console.log("old",old)
         for(let i = 0;i<hits.length;i++){
             if(old){
                 if(inception == 0){
                     address = hits[i].address;
+                    inception = hits[i].inception;
                 }
                 else if (hits[i].inception < inception){
                     address = hits[i].address;
+                    inception = hits[i].inception;
                 }
             }
             else{
                 if(hits[i].inception > inception){
+                    inception = hits[i].inception;
                     address = hits[i].address;
                 }
             }
